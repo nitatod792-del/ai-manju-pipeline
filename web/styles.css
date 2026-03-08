@@ -20,6 +20,8 @@ button { background: #1f6feb; color: #fff; border-color: #1f6feb; cursor: pointe
 .ok { color: #14804a; }
 .todo { color: #a76a00; }
 .upload-item { padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+.actions { margin-top: 6px; }
+.mini-btn { padding: 6px 10px; font-size: 12px; border-radius: 6px; }
 
 @media (max-width: 720px) {
   .container { margin: 12px auto; padding: 0 10px; }

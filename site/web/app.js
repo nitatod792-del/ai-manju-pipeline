@@ -52,9 +52,16 @@ function renderUploads() {
   var html = items.slice().reverse().map(function (x) {
     var source = x.mode === "paste" ? "粘贴文本" : "上传文件";
     var link = './project.html?projectId=' + encodeURIComponent(x.projectId || "");
-    return '<div class="upload-item"><strong>' + x.scriptTitle + '</strong> | 项目: ' + x.projectName + ' (' + x.projectId + ') | 风格: ' + x.style + ' | 来源: ' + source + ' | 文件: ' + x.fileName + ' | 时间: ' + x.createdAt + ' | <a href="' + link + '">进入项目</a></div>';
+    return '<div class="upload-item"><div><strong>' + x.scriptTitle + '</strong> | 项目: ' + x.projectName + ' (' + x.projectId + ') | 风格: ' + x.style + ' | 来源: ' + source + ' | 文件: ' + x.fileName + ' | 时间: ' + x.createdAt + '</div><div class="actions"><button class="mini-btn" data-link="' + link + '">进入项目</button></div></div>';
   }).join("");
   el.innerHTML = html;
+  var btns = el.querySelectorAll('.mini-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function (e) {
+      var link = e.currentTarget.getAttribute('data-link');
+      if (link) window.location.href = link;
+    });
+  }
 }
 
 function slugify(input) {
