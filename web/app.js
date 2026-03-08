@@ -53,21 +53,35 @@ function renderUploads() {
     .slice()
     .reverse()
     .map(
-      (x) => `<div class="upload-item"><strong>${x.scriptTitle}</strong> | 项目: ${x.projectName} (${x.projectId}) | 风格: ${x.style} | 文件: ${x.fileName} | 时间: ${x.createdAt}</div>`
+      (x) => `<div class="upload-item"><strong>${x.scriptTitle}</strong> | 项目: ${x.projectName} (${x.projectId}) | 风格: ${x.style} | 来源: ${x.mode === "paste" ? "粘贴文本" : "上传文件"} | 文件: ${x.fileName} | 时间: ${x.createdAt}</div>`
     )
     .join("");
 }
 
-function bindUploader() {
-  const btn = document.getElementById("uploadBtn");
-  btn.addEventListener("click", async () => {
-    const projectId = (document.getElementById("projectId").value || "").trim();
-    const projectName = (document.getElementById("projectName").value || "").trim() || projectId;
-    const style = (document.getElementById("projectStyle").value || "").trim() || "默认风格";
-    const scriptTitle = (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本";
-    const fileInput = document.getElementById("scriptFile");
-    const msg = document.getElementById("uploadMsg");
+function commonMeta() {
+  const projectId = (document.getElementById("projectId").value || "").trim();
+  const projectName = (document.getElementById("projectName").value || "").trim() || projectId;
+  const style = (document.getElementById("projectStyle").value || "").trim() || "默认风格";
+  const scriptTitle = (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本";
+  return { projectId, projectName, style, scriptTitle };
+}
 
+function pushUpload(record) {
+  const uploads = getUploads();
+  uploads.push({ ...record, createdAt: new Date().toLocaleString() });
+  setUploads(uploads);
+  renderUploads();
+}
+
+function bindUploader() {
+  const fileBtn = document.getElementById("uploadBtn");
+  const pasteBtn = document.getElementById("pasteBtn");
+  const fileInput = document.getElementById("scriptFile");
+  const textInput = document.getElementById("scriptText");
+  const msg = document.getElementById("uploadMsg");
+
+  fileBtn.addEventListener("click", async () => {
+    const { projectId, projectName, style, scriptTitle } = commonMeta();
     if (!projectId) {
       msg.textContent = "请先填写项目ID";
       msg.className = "small todo";
@@ -78,11 +92,10 @@ function bindUploader() {
       msg.className = "small todo";
       return;
     }
-
     const file = fileInput.files[0];
     const text = await file.text();
-    const uploads = getUploads();
-    uploads.push({
+    pushUpload({
+      mode: "file",
       projectId,
       projectName,
       style,
@@ -90,12 +103,35 @@ function bindUploader() {
       fileName: file.name,
       fileSize: file.size,
       contentPreview: text.slice(0, 300),
-      createdAt: new Date().toLocaleString(),
     });
-    setUploads(uploads);
-    renderUploads();
+    msg.textContent = "文件上传成功：已记录到本地浏览器。";
+    msg.className = "small ok";
+  });
 
-    msg.textContent = "上传成功：已记录到本地浏览器。下一步可把剧本内容发给助手进入自动化流水线。";
+  pasteBtn.addEventListener("click", () => {
+    const { projectId, projectName, style, scriptTitle } = commonMeta();
+    const text = (textInput.value || "").trim();
+    if (!projectId) {
+      msg.textContent = "请先填写项目ID";
+      msg.className = "small todo";
+      return;
+    }
+    if (!text) {
+      msg.textContent = "请先粘贴剧本文本";
+      msg.className = "small todo";
+      return;
+    }
+    pushUpload({
+      mode: "paste",
+      projectId,
+      projectName,
+      style,
+      scriptTitle,
+      fileName: "pasted-text.txt",
+      fileSize: text.length,
+      contentPreview: text.slice(0, 300),
+    });
+    msg.textContent = "粘贴文本已保存并记录。";
     msg.className = "small ok";
   });
 }

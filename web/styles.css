@@ -11,8 +11,10 @@ h2 { margin: 0 0 10px; font-size: 18px; }
 .kv { font-size: 13px; color: #444; margin: 6px 0 10px; }
 .stage { display: grid; grid-template-columns: 1fr auto; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #eee; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-input, button { padding: 8px 10px; border: 1px solid #d8dbe3; border-radius: 8px; font-size: 14px; }
+input, button, textarea { padding: 8px 10px; border: 1px solid #d8dbe3; border-radius: 8px; font-size: 14px; }
+textarea { width: 100%; resize: vertical; box-sizing: border-box; margin-bottom: 8px; }
 button { background: #1f6feb; color: #fff; border-color: #1f6feb; cursor: pointer; }
+.form-row.single { grid-template-columns: 1fr; }
 .ok { color: #14804a; }
 .todo { color: #a76a00; }
 .upload-item { padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }

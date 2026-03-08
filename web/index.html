@@ -23,9 +23,13 @@
       </div>
       <div class="form-row">
         <input id="scriptFile" type="file" accept=".txt,.md,text/plain,text/markdown" />
-        <button id="uploadBtn">上传并记录</button>
+        <button id="uploadBtn">上传文件并记录</button>
       </div>
-      <p class="muted small">当前版本为轻量上传：文件信息与文本会保存到当前浏览器本地，用于快速启动项目。</p>
+      <textarea id="scriptText" rows="8" placeholder="或直接粘贴剧本文本（不上传文件也可以）"></textarea>
+      <div class="form-row single">
+        <button id="pasteBtn">保存粘贴文本并记录</button>
+      </div>
+      <p class="muted small">支持两种方式：上传文件 或 直接粘贴文本。当前版本会保存到当前浏览器本地，用于快速启动项目。</p>
       <div id="uploadMsg" class="small"></div>
     </section>
 
