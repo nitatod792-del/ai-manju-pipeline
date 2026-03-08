@@ -31,19 +31,54 @@ function card(project) {
 }
 
 function getUploads() {
-  try {
-    return JSON.parse(localStorage.getItem(LOCAL_UPLOADS_KEY) || "[]");
-  } catch (e) {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(LOCAL_UPLOADS_KEY) || "[]"); }
+  catch (e) { return []; }
 }
 
 function setUploads(items) {
   localStorage.setItem(LOCAL_UPLOADS_KEY, JSON.stringify(items));
 }
 
-function renderUploads() {
+function slugify(input) {
+  return String(input || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "project";
+}
+
+function normalizeUploads() {
   var items = getUploads();
+  var changed = false;
+  for (var i = 0; i < items.length; i++) {
+    var x = items[i];
+    if (!x.recordId) {
+      x.recordId = "legacy-" + i + "-" + Date.now();
+      changed = true;
+    }
+    if (!x.projectId) {
+      x.projectId = x.recordId;
+      changed = true;
+    }
+    if (!x.projectName) {
+      x.projectName = (x.scriptTitle || "未命名") + "项目";
+      changed = true;
+    }
+    if (!x.style) {
+      x.style = "默认风格";
+      changed = true;
+    }
+    if (!x.fullText && x.contentPreview) {
+      x.fullText = x.contentPreview;
+      changed = true;
+    }
+  }
+  if (changed) setUploads(items);
+  return items;
+}
+
+function renderUploads() {
+  var items = normalizeUploads();
   var el = document.getElementById("uploads");
   if (!items.length) {
     el.innerHTML = '<p class="muted small">暂无上传记录</p>';
@@ -62,14 +97,6 @@ function renderUploads() {
       if (link) window.location.href = link;
     });
   }
-}
-
-function slugify(input) {
-  return String(input || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40) || "project";
 }
 
 function guessTitleFromText(text) {
@@ -144,7 +171,7 @@ function bindUploader() {
     var file = fileInput.files[0];
     readFileCompat(file, function (text) {
       meta = inferAndFill(meta, text, file.name);
-      pushUpload({ mode: "file", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: file.name, fileSize: file.size, contentPreview: String(text || "").slice(0, 300) });
+      pushUpload({ mode: "file", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: file.name, fileSize: file.size, contentPreview: String(text || "").slice(0, 300), fullText: String(text || "") });
       setMsg("文件上传成功：已自动回填信息并记录到本地浏览器。", "ok");
     }, function () { setMsg("文件读取失败，请重试或改用粘贴文本。", "todo"); });
   });
@@ -154,7 +181,7 @@ function bindUploader() {
     var text = (textInput.value || "").trim();
     if (!text) return setMsg("请先粘贴剧本文本", "todo");
     meta = inferAndFill(meta, text, "pasted-text");
-    pushUpload({ mode: "paste", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: "pasted-text.txt", fileSize: text.length, contentPreview: text.slice(0, 300) });
+    pushUpload({ mode: "paste", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: "pasted-text.txt", fileSize: text.length, contentPreview: text.slice(0, 300), fullText: text });
     setMsg("粘贴文本已自动回填信息并保存记录。", "ok");
   });
 }

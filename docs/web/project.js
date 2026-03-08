@@ -1,4 +1,5 @@
 var LOCAL_UPLOADS_KEY = "ai_manju_uploads_v1";
+var ASSET_KEY = "ai_manju_assets_v1";
 var STAGES = [
   { id: "01_input_script", label: "1. 文本输入" },
   { id: "02_extracted_assets", label: "2. 资产抽取" },
@@ -14,14 +15,21 @@ function getUploads() {
   catch (e) { return []; }
 }
 
+function getAssets() {
+  try { return JSON.parse(localStorage.getItem(ASSET_KEY) || "{}"); }
+  catch (e) { return {}; }
+}
+
 function getParam(name) {
   var url = new URL(window.location.href);
   return (url.searchParams.get(name) || "").trim();
 }
 
 function renderStages(record) {
+  var assets = getAssets();
+  var hasStage2 = !!assets[record.recordId || ""];
   var html = STAGES.map(function (s, i) {
-    var done = i === 0;
+    var done = (i === 0) || (i === 1 && hasStage2);
     var cls = done ? "ok" : "todo";
     var txt = done ? "已完成" : "待完成";
     var link = "./stage.html?recordId=" + encodeURIComponent(record.recordId || "") + "&stage=" + encodeURIComponent(s.id);
