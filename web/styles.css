@@ -11,7 +11,7 @@ h2 { margin: 0 0 10px; font-size: 18px; }
 .title { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
 .badge { background: #eef3ff; color: #2748a5; font-size: 12px; padding: 3px 8px; border-radius: 999px; }
 .kv { font-size: 13px; color: #444; margin: 6px 0 10px; }
-.stage { display: grid; grid-template-columns: 1fr auto; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #eee; }
+.stage { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #eee; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 input, button, textarea { padding: 10px 12px; border: 1px solid #d8dbe3; border-radius: 8px; font-size: 14px; }
 textarea { width: 100%; resize: vertical; box-sizing: border-box; margin-bottom: 8px; min-height: 140px; }

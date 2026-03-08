@@ -1,21 +1,17 @@
 var LOCAL_UPLOADS_KEY = "ai_manju_uploads_v1";
-
 var STAGES = [
-  "1. 文本输入",
-  "2. 资产抽取",
-  "3. 提示词",
-  "4. 图片资产",
-  "5. 分镜脚本",
-  "6. 镜头视频",
-  "7. 成片",
+  { id: "01_input_script", label: "1. 文本输入" },
+  { id: "02_extracted_assets", label: "2. 资产抽取" },
+  { id: "03_prompts", label: "3. 提示词" },
+  { id: "04_images", label: "4. 图片资产" },
+  { id: "05_storyboard", label: "5. 分镜脚本" },
+  { id: "06_video_clips", label: "6. 镜头视频" },
+  { id: "07_final_edit", label: "7. 成片" },
 ];
 
 function getUploads() {
-  try {
-    return JSON.parse(localStorage.getItem(LOCAL_UPLOADS_KEY) || "[]");
-  } catch (e) {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(LOCAL_UPLOADS_KEY) || "[]"); }
+  catch (e) { return []; }
 }
 
 function getParam(name) {
@@ -23,47 +19,42 @@ function getParam(name) {
   return (url.searchParams.get(name) || "").trim();
 }
 
-function renderStages(records) {
-  var done = records.length > 0 ? 1 : 0;
+function renderStages(record) {
   var html = STAGES.map(function (s, i) {
-    var ok = i < done;
-    var cls = ok ? "ok" : "todo";
-    var txt = ok ? "已完成" : "待完成";
-    return '<div class="stage"><span>' + s + '</span><span class="' + cls + '">' + txt + '</span></div>';
+    var done = i === 0;
+    var cls = done ? "ok" : "todo";
+    var txt = done ? "已完成" : "待完成";
+    var link = "./stage.html?recordId=" + encodeURIComponent(record.recordId || "") + "&stage=" + encodeURIComponent(s.id);
+    return '<div class="stage"><span>' + s.label + '</span><span class="' + cls + '">' + txt + '</span><button class="mini-btn" data-link="' + link + '">进入阶段</button></div>';
   }).join("");
-  document.getElementById("stages").innerHTML = html;
-}
-
-function renderRecords(records) {
-  var el = document.getElementById("records");
-  if (!records.length) {
-    el.innerHTML = '<p class="muted small">当前项目暂无本地记录</p>';
-    return;
+  var el = document.getElementById("stages");
+  el.innerHTML = html;
+  var btns = el.querySelectorAll('.mini-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function (e) {
+      var link = e.currentTarget.getAttribute('data-link');
+      if (link) window.location.href = link;
+    });
   }
-  el.innerHTML = records
-    .slice()
-    .reverse()
-    .map(function (x) {
-      var src = x.mode === "paste" ? "粘贴文本" : "上传文件";
-      return '<div class="upload-item"><strong>' + x.scriptTitle + '</strong> | 来源: ' + src + ' | 文件: ' + x.fileName + ' | 时间: ' + x.createdAt + '<br/><span class="muted small">预览：' + (x.contentPreview || "").replace(/</g, "&lt;") + '</span></div>';
-    })
-    .join("");
 }
 
 function run() {
-  var projectId = getParam("projectId");
-  if (!projectId) {
-    document.getElementById("title").textContent = "项目详情（缺少projectId）";
-    document.getElementById("meta").textContent = "请从项目记录入口进入。";
+  var recordId = getParam("recordId");
+  if (!recordId) {
+    document.getElementById("title").textContent = "项目详情（缺少recordId）";
+    document.getElementById("meta").textContent = "请从记录列表点击进入项目。";
     return;
   }
   var all = getUploads();
-  var records = all.filter(function (x) { return (x.projectId || "") === projectId; });
-  var first = records[0] || {};
-  document.getElementById("title").textContent = (first.projectName || projectId) + " - 项目详情";
-  document.getElementById("meta").textContent = "项目ID: " + projectId + " | 风格: " + (first.style || "默认风格") + " | 记录数: " + records.length;
-  renderStages(records);
-  renderRecords(records);
+  var record = all.find(function (x) { return (x.recordId || "") === recordId; });
+  if (!record) {
+    document.getElementById("title").textContent = "项目详情";
+    document.getElementById("meta").textContent = "未找到该记录，请返回重试。";
+    return;
+  }
+  document.getElementById("title").textContent = (record.projectName || record.projectId) + " - 项目详情";
+  document.getElementById("meta").textContent = "记录ID: " + recordId + " | 项目ID: " + (record.projectId || "") + " | 风格: " + (record.style || "默认风格");
+  renderStages(record);
 }
 
 run();

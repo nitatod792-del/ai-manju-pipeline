@@ -51,7 +51,7 @@ function renderUploads() {
   }
   var html = items.slice().reverse().map(function (x) {
     var source = x.mode === "paste" ? "粘贴文本" : "上传文件";
-    var link = './project.html?projectId=' + encodeURIComponent(x.projectId || "");
+    var link = './project.html?recordId=' + encodeURIComponent(x.recordId || "");
     return '<div class="upload-item"><div><strong>' + x.scriptTitle + '</strong> | 项目: ' + x.projectName + ' (' + x.projectId + ') | 风格: ' + x.style + ' | 来源: ' + source + ' | 文件: ' + x.fileName + ' | 时间: ' + x.createdAt + '</div><div class="actions"><button class="mini-btn" data-link="' + link + '">进入项目</button></div></div>';
   }).join("");
   el.innerHTML = html;
@@ -75,8 +75,7 @@ function slugify(input) {
 function guessTitleFromText(text) {
   var lines = String(text || "").split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
   if (!lines.length) return "未命名剧本";
-  var first = lines[0];
-  first = first.replace(/^#+\s*/, "");
+  var first = lines[0].replace(/^#+\s*/, "");
   return first.slice(0, 30) || "未命名剧本";
 }
 
@@ -84,56 +83,43 @@ function inferAndFill(meta, text, fileName) {
   var titleGuess = guessTitleFromText(text);
   var now = new Date();
   var d = String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0");
-
-  if (!meta.scriptTitle || meta.scriptTitle === "未命名剧本") {
-    meta.scriptTitle = titleGuess;
-  }
-  if (!meta.projectName || meta.projectName === meta.projectId) {
-    meta.projectName = titleGuess.slice(0, 20) + "项目";
-  }
+  if (!meta.scriptTitle || meta.scriptTitle === "未命名剧本") meta.scriptTitle = titleGuess;
+  if (!meta.projectName || meta.projectName === meta.projectId) meta.projectName = titleGuess.slice(0, 20) + "项目";
   if (!meta.projectId) {
     var fromFile = String(fileName || "").replace(/\.[^.]+$/, "");
     var seed = fromFile || titleGuess;
     meta.projectId = slugify(seed) + "-" + d;
   }
-  if (!meta.style || meta.style === "默认风格") {
-    meta.style = "默认风格";
-  }
-
+  if (!meta.style || meta.style === "默认风格") meta.style = "默认风格";
   document.getElementById("projectId").value = meta.projectId;
   document.getElementById("projectName").value = meta.projectName;
   document.getElementById("projectStyle").value = meta.style;
   document.getElementById("scriptTitle").value = meta.scriptTitle;
-
   return meta;
 }
 
 function commonMeta() {
-  var projectId = (document.getElementById("projectId").value || "").trim();
-  var projectName = (document.getElementById("projectName").value || "").trim() || projectId;
-  var style = (document.getElementById("projectStyle").value || "").trim() || "默认风格";
-  var scriptTitle = (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本";
   return {
-    projectId: projectId,
-    projectName: projectName,
-    style: style,
-    scriptTitle: scriptTitle,
+    projectId: (document.getElementById("projectId").value || "").trim(),
+    projectName: (document.getElementById("projectName").value || "").trim(),
+    style: (document.getElementById("projectStyle").value || "").trim() || "默认风格",
+    scriptTitle: (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本",
   };
 }
 
 function pushUpload(record) {
   var uploads = getUploads();
   record.createdAt = new Date().toLocaleString();
+  record.recordId = "rec-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
+  if (!record.projectId) record.projectId = record.recordId;
+  if (!record.projectName) record.projectName = record.scriptTitle + "项目";
   uploads.push(record);
   setUploads(uploads);
   renderUploads();
 }
 
 function readFileCompat(file, onOk, onErr) {
-  if (file && typeof file.text === "function") {
-    file.text().then(onOk).catch(onErr);
-    return;
-  }
+  if (file && typeof file.text === "function") return file.text().then(onOk).catch(onErr);
   var reader = new FileReader();
   reader.onload = function () { onOk(String(reader.result || "")); };
   reader.onerror = function () { onErr(new Error("文件读取失败")); };
@@ -154,58 +140,27 @@ function bindUploader() {
 
   fileBtn.addEventListener("click", function () {
     var meta = commonMeta();
-    if (!fileInput.files || !fileInput.files[0]) {
-      setMsg("请先选择剧本文件（txt/md）", "todo");
-      return;
-    }
+    if (!fileInput.files || !fileInput.files[0]) return setMsg("请先选择剧本文件（txt/md）", "todo");
     var file = fileInput.files[0];
-    readFileCompat(
-      file,
-      function (text) {
-        meta = inferAndFill(meta, text, file.name);
-        pushUpload({
-          mode: "file",
-          projectId: meta.projectId,
-          projectName: meta.projectName,
-          style: meta.style,
-          scriptTitle: meta.scriptTitle,
-          fileName: file.name,
-          fileSize: file.size,
-          contentPreview: String(text || "").slice(0, 300),
-        });
-        setMsg("文件上传成功：已自动回填信息并记录到本地浏览器。", "ok");
-      },
-      function () {
-        setMsg("文件读取失败，请重试或改用粘贴文本。", "todo");
-      }
-    );
+    readFileCompat(file, function (text) {
+      meta = inferAndFill(meta, text, file.name);
+      pushUpload({ mode: "file", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: file.name, fileSize: file.size, contentPreview: String(text || "").slice(0, 300) });
+      setMsg("文件上传成功：已自动回填信息并记录到本地浏览器。", "ok");
+    }, function () { setMsg("文件读取失败，请重试或改用粘贴文本。", "todo"); });
   });
 
   pasteBtn.addEventListener("click", function () {
     var meta = commonMeta();
     var text = (textInput.value || "").trim();
-    if (!text) {
-      setMsg("请先粘贴剧本文本", "todo");
-      return;
-    }
+    if (!text) return setMsg("请先粘贴剧本文本", "todo");
     meta = inferAndFill(meta, text, "pasted-text");
-    pushUpload({
-      mode: "paste",
-      projectId: meta.projectId,
-      projectName: meta.projectName,
-      style: meta.style,
-      scriptTitle: meta.scriptTitle,
-      fileName: "pasted-text.txt",
-      fileSize: text.length,
-      contentPreview: text.slice(0, 300),
-    });
+    pushUpload({ mode: "paste", projectId: meta.projectId, projectName: meta.projectName, style: meta.style, scriptTitle: meta.scriptTitle, fileName: "pasted-text.txt", fileSize: text.length, contentPreview: text.slice(0, 300) });
     setMsg("粘贴文本已自动回填信息并保存记录。", "ok");
   });
 }
 
 function loadDashboard() {
-  var dataUrl = "../dashboard/projects-index.json";
-  fetch(dataUrl, { cache: "no-store" })
+  fetch("../dashboard/projects-index.json", { cache: "no-store" })
     .then(function (res) { return res.json(); })
     .then(function (data) {
       document.getElementById("meta").textContent = "项目数: " + data.project_count + " | 数据更新时间: " + data.generated_at;
