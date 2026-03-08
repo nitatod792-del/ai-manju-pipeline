@@ -56,6 +56,50 @@ function renderUploads() {
   el.innerHTML = html;
 }
 
+function slugify(input) {
+  return String(input || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "project";
+}
+
+function guessTitleFromText(text) {
+  var lines = String(text || "").split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+  if (!lines.length) return "未命名剧本";
+  var first = lines[0];
+  first = first.replace(/^#+\s*/, "");
+  return first.slice(0, 30) || "未命名剧本";
+}
+
+function inferAndFill(meta, text, fileName) {
+  var titleGuess = guessTitleFromText(text);
+  var now = new Date();
+  var d = String(now.getFullYear()) + String(now.getMonth() + 1).padStart(2, "0") + String(now.getDate()).padStart(2, "0");
+
+  if (!meta.scriptTitle || meta.scriptTitle === "未命名剧本") {
+    meta.scriptTitle = titleGuess;
+  }
+  if (!meta.projectName || meta.projectName === meta.projectId) {
+    meta.projectName = titleGuess.slice(0, 20) + "项目";
+  }
+  if (!meta.projectId) {
+    var fromFile = String(fileName || "").replace(/\.[^.]+$/, "");
+    var seed = fromFile || titleGuess;
+    meta.projectId = slugify(seed) + "-" + d;
+  }
+  if (!meta.style || meta.style === "默认风格") {
+    meta.style = "默认风格";
+  }
+
+  document.getElementById("projectId").value = meta.projectId;
+  document.getElementById("projectName").value = meta.projectName;
+  document.getElementById("projectStyle").value = meta.style;
+  document.getElementById("scriptTitle").value = meta.scriptTitle;
+
+  return meta;
+}
+
 function commonMeta() {
   var projectId = (document.getElementById("projectId").value || "").trim();
   var projectName = (document.getElementById("projectName").value || "").trim() || projectId;
@@ -102,10 +146,6 @@ function bindUploader() {
 
   fileBtn.addEventListener("click", function () {
     var meta = commonMeta();
-    if (!meta.projectId) {
-      setMsg("请先填写项目ID", "todo");
-      return;
-    }
     if (!fileInput.files || !fileInput.files[0]) {
       setMsg("请先选择剧本文件（txt/md）", "todo");
       return;
@@ -114,6 +154,7 @@ function bindUploader() {
     readFileCompat(
       file,
       function (text) {
+        meta = inferAndFill(meta, text, file.name);
         pushUpload({
           mode: "file",
           projectId: meta.projectId,
@@ -124,7 +165,7 @@ function bindUploader() {
           fileSize: file.size,
           contentPreview: String(text || "").slice(0, 300),
         });
-        setMsg("文件上传成功：已记录到本地浏览器。", "ok");
+        setMsg("文件上传成功：已自动回填信息并记录到本地浏览器。", "ok");
       },
       function () {
         setMsg("文件读取失败，请重试或改用粘贴文本。", "todo");
@@ -135,14 +176,11 @@ function bindUploader() {
   pasteBtn.addEventListener("click", function () {
     var meta = commonMeta();
     var text = (textInput.value || "").trim();
-    if (!meta.projectId) {
-      setMsg("请先填写项目ID", "todo");
-      return;
-    }
     if (!text) {
       setMsg("请先粘贴剧本文本", "todo");
       return;
     }
+    meta = inferAndFill(meta, text, "pasted-text");
     pushUpload({
       mode: "paste",
       projectId: meta.projectId,
@@ -153,7 +191,7 @@ function bindUploader() {
       fileSize: text.length,
       contentPreview: text.slice(0, 300),
     });
-    setMsg("粘贴文本已保存并记录。", "ok");
+    setMsg("粘贴文本已自动回填信息并保存记录。", "ok");
   });
 }
 

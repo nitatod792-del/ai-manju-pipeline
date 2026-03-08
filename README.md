@@ -60,6 +60,29 @@ python3 output/novel-to-ai-manju/software/intake_text.py \
 python3 output/novel-to-ai-manju/software/build_dashboard.py
 ```
 
+## 第2步：剧本改编（本小时新增）
+
+脚本：`software/adapt_script.py`
+
+支持把小说/剧本文本自动拆成可复用的漫剧改编稿（场景目标、对白、镜头建议、时长建议），并生成结构化 JSON，便于后续分镜/生视频继续加工。
+
+示例：
+
+```bash
+python3 output/novel-to-ai-manju/software/adapt_script.py \
+  --project-root output/novel-to-ai-manju \
+  --project-id my-novel-001 \
+  --source /path/to/chapter1.md \
+  --episode-title "第1集 夜雨追凶" \
+  --chunk-size 4
+```
+
+执行结果：
+
+- 产出改编稿：`projects/<project_id>/05_storyboard/*-adapted-script.md`
+- 产出结构化数据：`projects/<project_id>/05_storyboard/*-adapted-script.json`
+- 追加日志：`projects/<project_id>/08_logs/adapt-script-log.jsonl`
+
 ## 外网发布（GitHub Pages）
 
 已准备导出脚本：`software/export_site.py`
