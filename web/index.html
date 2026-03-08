@@ -10,7 +10,31 @@
   <main class="container">
     <h1>AI漫剧项目看板</h1>
     <p id="meta" class="muted">加载中...</p>
+
+    <section class="uploader card">
+      <h2>上传剧本（Step 1）</h2>
+      <div class="form-row">
+        <input id="projectId" placeholder="项目ID，如 my-novel-001" />
+        <input id="projectName" placeholder="项目名，如 我的第一部漫剧" />
+      </div>
+      <div class="form-row">
+        <input id="projectStyle" placeholder="风格，如 国风写实" />
+        <input id="scriptTitle" placeholder="剧本标题，如 第一集" />
+      </div>
+      <div class="form-row">
+        <input id="scriptFile" type="file" accept=".txt,.md,text/plain,text/markdown" />
+        <button id="uploadBtn">上传并记录</button>
+      </div>
+      <p class="muted small">当前版本为轻量上传：文件信息与文本会保存到当前浏览器本地，用于快速启动项目。</p>
+      <div id="uploadMsg" class="small"></div>
+    </section>
+
     <section id="cards" class="grid"></section>
+
+    <section class="card">
+      <h2>本地上传记录</h2>
+      <div id="uploads"></div>
+    </section>
   </main>
   <script src="app.js"></script>
 </body>
