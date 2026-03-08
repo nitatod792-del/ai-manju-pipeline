@@ -1,4 +1,4 @@
-const STAGE_LABELS = {
+var STAGE_LABELS = {
   "01_input_script": "1. 文本输入",
   "02_extracted_assets": "2. 资产抽取",
   "03_prompts": "3. 提示词",
@@ -8,32 +8,32 @@ const STAGE_LABELS = {
   "07_final_edit": "7. 成片",
 };
 
-const LOCAL_UPLOADS_KEY = "ai_manju_uploads_v1";
+var LOCAL_UPLOADS_KEY = "ai_manju_uploads_v1";
 
 function stageLine(key, val) {
-  const status = val.done ? "已产出" : "待产出";
-  const cls = val.done ? "ok" : "todo";
-  return `<div class="stage"><span>${STAGE_LABELS[key] || key}</span><span class="${cls}">${status} (${val.count})</span></div>`;
+  var status = val.done ? "已产出" : "待产出";
+  var cls = val.done ? "ok" : "todo";
+  return '<div class="stage"><span>' + (STAGE_LABELS[key] || key) + '</span><span class="' + cls + '">' + status + ' (' + val.count + ')</span></div>';
 }
 
 function card(project) {
-  const stageHtml = Object.entries(project.stages).map(([k, v]) => stageLine(k, v)).join("");
-  return `
-    <article class="card">
-      <div class="title">
-        <strong>${project.project_name}</strong>
-        <span class="badge">风格: ${project.style}</span>
-      </div>
-      <div class="kv">项目ID: ${project.project_id} | 数字资产: ${project.total_assets}</div>
-      ${stageHtml}
-    </article>
-  `;
+  var keys = Object.keys(project.stages || {});
+  var stageHtml = keys.map(function (k) { return stageLine(k, project.stages[k]); }).join("");
+  return '' +
+    '<article class="card">' +
+    '  <div class="title">' +
+    '    <strong>' + project.project_name + '</strong>' +
+    '    <span class="badge">风格: ' + project.style + '</span>' +
+    '  </div>' +
+    '  <div class="kv">项目ID: ' + project.project_id + ' | 数字资产: ' + project.total_assets + '</div>' +
+       stageHtml +
+    '</article>';
 }
 
 function getUploads() {
   try {
     return JSON.parse(localStorage.getItem(LOCAL_UPLOADS_KEY) || "[]");
-  } catch {
+  } catch (e) {
     return [];
   }
 }
@@ -43,108 +43,139 @@ function setUploads(items) {
 }
 
 function renderUploads() {
-  const items = getUploads();
-  const el = document.getElementById("uploads");
+  var items = getUploads();
+  var el = document.getElementById("uploads");
   if (!items.length) {
     el.innerHTML = '<p class="muted small">暂无上传记录</p>';
     return;
   }
-  el.innerHTML = items
-    .slice()
-    .reverse()
-    .map(
-      (x) => `<div class="upload-item"><strong>${x.scriptTitle}</strong> | 项目: ${x.projectName} (${x.projectId}) | 风格: ${x.style} | 来源: ${x.mode === "paste" ? "粘贴文本" : "上传文件"} | 文件: ${x.fileName} | 时间: ${x.createdAt}</div>`
-    )
-    .join("");
+  var html = items.slice().reverse().map(function (x) {
+    var source = x.mode === "paste" ? "粘贴文本" : "上传文件";
+    return '<div class="upload-item"><strong>' + x.scriptTitle + '</strong> | 项目: ' + x.projectName + ' (' + x.projectId + ') | 风格: ' + x.style + ' | 来源: ' + source + ' | 文件: ' + x.fileName + ' | 时间: ' + x.createdAt + '</div>';
+  }).join("");
+  el.innerHTML = html;
 }
 
 function commonMeta() {
-  const projectId = (document.getElementById("projectId").value || "").trim();
-  const projectName = (document.getElementById("projectName").value || "").trim() || projectId;
-  const style = (document.getElementById("projectStyle").value || "").trim() || "默认风格";
-  const scriptTitle = (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本";
-  return { projectId, projectName, style, scriptTitle };
+  var projectId = (document.getElementById("projectId").value || "").trim();
+  var projectName = (document.getElementById("projectName").value || "").trim() || projectId;
+  var style = (document.getElementById("projectStyle").value || "").trim() || "默认风格";
+  var scriptTitle = (document.getElementById("scriptTitle").value || "").trim() || "未命名剧本";
+  return {
+    projectId: projectId,
+    projectName: projectName,
+    style: style,
+    scriptTitle: scriptTitle,
+  };
 }
 
 function pushUpload(record) {
-  const uploads = getUploads();
-  uploads.push({ ...record, createdAt: new Date().toLocaleString() });
+  var uploads = getUploads();
+  record.createdAt = new Date().toLocaleString();
+  uploads.push(record);
   setUploads(uploads);
   renderUploads();
 }
 
-function bindUploader() {
-  const fileBtn = document.getElementById("uploadBtn");
-  const pasteBtn = document.getElementById("pasteBtn");
-  const fileInput = document.getElementById("scriptFile");
-  const textInput = document.getElementById("scriptText");
-  const msg = document.getElementById("uploadMsg");
+function readFileCompat(file, onOk, onErr) {
+  if (file && typeof file.text === "function") {
+    file.text().then(onOk).catch(onErr);
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function () { onOk(String(reader.result || "")); };
+  reader.onerror = function () { onErr(new Error("文件读取失败")); };
+  reader.readAsText(file, "utf-8");
+}
 
-  fileBtn.addEventListener("click", async () => {
-    const { projectId, projectName, style, scriptTitle } = commonMeta();
-    if (!projectId) {
-      msg.textContent = "请先填写项目ID";
-      msg.className = "small todo";
+function setMsg(text, cls) {
+  var msg = document.getElementById("uploadMsg");
+  msg.textContent = text;
+  msg.className = "small " + cls;
+}
+
+function bindUploader() {
+  var fileBtn = document.getElementById("uploadBtn");
+  var pasteBtn = document.getElementById("pasteBtn");
+  var fileInput = document.getElementById("scriptFile");
+  var textInput = document.getElementById("scriptText");
+
+  fileBtn.addEventListener("click", function () {
+    var meta = commonMeta();
+    if (!meta.projectId) {
+      setMsg("请先填写项目ID", "todo");
       return;
     }
     if (!fileInput.files || !fileInput.files[0]) {
-      msg.textContent = "请先选择剧本文件（txt/md）";
-      msg.className = "small todo";
+      setMsg("请先选择剧本文件（txt/md）", "todo");
       return;
     }
-    const file = fileInput.files[0];
-    const text = await file.text();
-    pushUpload({
-      mode: "file",
-      projectId,
-      projectName,
-      style,
-      scriptTitle,
-      fileName: file.name,
-      fileSize: file.size,
-      contentPreview: text.slice(0, 300),
-    });
-    msg.textContent = "文件上传成功：已记录到本地浏览器。";
-    msg.className = "small ok";
+    var file = fileInput.files[0];
+    readFileCompat(
+      file,
+      function (text) {
+        pushUpload({
+          mode: "file",
+          projectId: meta.projectId,
+          projectName: meta.projectName,
+          style: meta.style,
+          scriptTitle: meta.scriptTitle,
+          fileName: file.name,
+          fileSize: file.size,
+          contentPreview: String(text || "").slice(0, 300),
+        });
+        setMsg("文件上传成功：已记录到本地浏览器。", "ok");
+      },
+      function () {
+        setMsg("文件读取失败，请重试或改用粘贴文本。", "todo");
+      }
+    );
   });
 
-  pasteBtn.addEventListener("click", () => {
-    const { projectId, projectName, style, scriptTitle } = commonMeta();
-    const text = (textInput.value || "").trim();
-    if (!projectId) {
-      msg.textContent = "请先填写项目ID";
-      msg.className = "small todo";
+  pasteBtn.addEventListener("click", function () {
+    var meta = commonMeta();
+    var text = (textInput.value || "").trim();
+    if (!meta.projectId) {
+      setMsg("请先填写项目ID", "todo");
       return;
     }
     if (!text) {
-      msg.textContent = "请先粘贴剧本文本";
-      msg.className = "small todo";
+      setMsg("请先粘贴剧本文本", "todo");
       return;
     }
     pushUpload({
       mode: "paste",
-      projectId,
-      projectName,
-      style,
-      scriptTitle,
+      projectId: meta.projectId,
+      projectName: meta.projectName,
+      style: meta.style,
+      scriptTitle: meta.scriptTitle,
       fileName: "pasted-text.txt",
       fileSize: text.length,
       contentPreview: text.slice(0, 300),
     });
-    msg.textContent = "粘贴文本已保存并记录。";
-    msg.className = "small ok";
+    setMsg("粘贴文本已保存并记录。", "ok");
   });
 }
 
-async function run() {
-  const res = await fetch("../dashboard/projects-index.json", { cache: "no-store" });
-  const data = await res.json();
-  document.getElementById("meta").textContent = `项目数: ${data.project_count} | 数据更新时间: ${data.generated_at}`;
-  document.getElementById("cards").innerHTML = data.projects.map(card).join("") || "<p>暂无项目数据</p>";
-  bindUploader();
-  renderUploads();
+function loadDashboard() {
+  var dataUrl = "../dashboard/projects-index.json";
+  fetch(dataUrl, { cache: "no-store" })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      document.getElementById("meta").textContent = "项目数: " + data.project_count + " | 数据更新时间: " + data.generated_at;
+      var cards = (data.projects || []).map(card).join("");
+      document.getElementById("cards").innerHTML = cards || "<p>暂无项目数据</p>";
+    })
+    .catch(function () {
+      document.getElementById("meta").textContent = "项目数据加载失败（不影响上传剧本）";
+      document.getElementById("cards").innerHTML = "<p class='muted small'>看板数据暂不可用，你仍可先上传剧本。</p>";
+    });
 }
 
-run().catch((err) => {
-  document.getElementById("meta").textContent = `加载失败: ${err.message}`;
-});
+function run() {
+  bindUploader();
+  renderUploads();
+  loadDashboard();
+}
+
+run();
