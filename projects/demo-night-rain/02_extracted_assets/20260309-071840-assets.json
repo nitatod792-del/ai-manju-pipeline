@@ -1,0 +1,49 @@
+{
+  "id": "20260309-071840",
+  "project_id": "demo-night-rain",
+  "title": "20260309-demo",
+  "source_file": "/Users/apple/.openclaw/workspace/output/novel-to-ai-manju/projects/demo-night-rain/01_input_script/20260309-demo.txt",
+  "generated_at": "2026-03-09T07:18:40",
+  "method": "rule-based-v1 + llm-prompt-template",
+  "characters": [],
+  "scenes": [
+    {
+      "name": "【夜·旧城区巷口】"
+    },
+    {
+      "name": "陈默：先去咖啡馆，合同在我这。"
+    },
+    {
+      "name": "两人走进街角咖啡馆，桌上放着录音笔和照片。"
+    }
+  ],
+  "props": [
+    {
+      "name": "手机"
+    },
+    {
+      "name": "信"
+    },
+    {
+      "name": "照片"
+    },
+    {
+      "name": "录音笔"
+    },
+    {
+      "name": "行李箱"
+    },
+    {
+      "name": "车"
+    },
+    {
+      "name": "雨伞"
+    },
+    {
+      "name": "合同"
+    },
+    {
+      "name": "文件"
+    }
+  ]
+}

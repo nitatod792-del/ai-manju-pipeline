@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-09T07:14:30",
+  "generated_at": "2026-03-09T07:18:51",
   "project_count": 1,
   "projects": [
     {
@@ -10,12 +10,12 @@
       "updated_at": "2026-03-09T06:54:47",
       "stages": {
         "01_input_script": {
-          "count": 0,
-          "done": false
+          "count": 1,
+          "done": true
         },
         "02_extracted_assets": {
-          "count": 0,
-          "done": false
+          "count": 3,
+          "done": true
         },
         "03_prompts": {
           "count": 0,
@@ -38,7 +38,7 @@
           "done": false
         }
       },
-      "total_assets": 2
+      "total_assets": 6
     }
   ]
 }

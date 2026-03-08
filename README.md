@@ -97,6 +97,28 @@ GitHub Pages入口文件：
 
 - `site/web/index.html`
 
+## 第2步：资产抽取（已落地 v1）
+
+脚本：`software/extract_assets.py`
+
+作用：从剧本文本抽取 `人物 / 场景 / 主要道具`，并产出可继续喂给大模型的标准提示。
+
+示例：
+
+```bash
+python3 output/novel-to-ai-manju/software/extract_assets.py \
+  --project-root output/novel-to-ai-manju \
+  --project-id my-novel-001
+```
+
+执行结果（写入 `projects/<project_id>/02_extracted_assets/`）：
+
+- `*-assets.json`：结构化资产
+- `*-assets.md`：可读版资产列表
+- `*-llm-prompt.txt`：发给大模型的抽取提示文本
+
+日志：`projects/<project_id>/08_logs/extract-assets-log.jsonl`
+
 ## 自动任务
 
 - 每小时推进：持续做系统落地
