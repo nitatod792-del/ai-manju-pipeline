@@ -1,5 +1,44 @@
 {
-  "generated_at": "2026-03-09T06:54:20",
-  "project_count": 0,
-  "projects": []
+  "generated_at": "2026-03-09T06:59:25",
+  "project_count": 1,
+  "projects": [
+    {
+      "project_id": "demo-night-rain",
+      "project_name": "demo-night-rain",
+      "style": "unknown",
+      "created_at": "2026-03-09T06:54:47",
+      "updated_at": "2026-03-09T06:54:47",
+      "stages": {
+        "01_input_script": {
+          "count": 0,
+          "done": false
+        },
+        "02_extracted_assets": {
+          "count": 0,
+          "done": false
+        },
+        "03_prompts": {
+          "count": 0,
+          "done": false
+        },
+        "04_images": {
+          "count": 0,
+          "done": false
+        },
+        "05_storyboard": {
+          "count": 2,
+          "done": true
+        },
+        "06_video_clips": {
+          "count": 0,
+          "done": false
+        },
+        "07_final_edit": {
+          "count": 0,
+          "done": false
+        }
+      },
+      "total_assets": 2
+    }
+  ]
 }

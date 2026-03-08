@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>AI漫剧项目看板</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260309m1" />
 </head>
 <body>
   <main class="container">
@@ -13,14 +16,17 @@
 
     <section class="uploader card">
       <h2>上传剧本（Step 1）</h2>
-      <div class="form-row">
-        <input id="projectId" placeholder="项目ID，如 my-novel-001" />
-        <input id="projectName" placeholder="项目名，如 我的第一部漫剧" />
-      </div>
-      <div class="form-row">
-        <input id="projectStyle" placeholder="风格，如 国风写实" />
-        <input id="scriptTitle" placeholder="剧本标题，如 第一集" />
-      </div>
+      <details class="card-lite">
+        <summary>高级字段（可不填，系统会自动生成）</summary>
+        <div class="form-row">
+          <input id="projectId" placeholder="项目ID（可空）" />
+          <input id="projectName" placeholder="项目名（可空）" />
+        </div>
+        <div class="form-row">
+          <input id="projectStyle" placeholder="风格（可空，默认风格）" />
+          <input id="scriptTitle" placeholder="剧本标题（可空）" />
+        </div>
+      </details>
       <div class="form-row">
         <input id="scriptFile" type="file" accept=".txt,.md,text/plain,text/markdown" />
         <button id="uploadBtn">上传文件并记录</button>
@@ -40,6 +46,6 @@
       <div id="uploads"></div>
     </section>
   </main>
-  <script src="app.js"></script>
+  <script src="app.js?v=20260309m2"></script>
 </body>
 </html>

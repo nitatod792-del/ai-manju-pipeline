@@ -1,0 +1,44 @@
+{
+  "id": "20260309-065447",
+  "project_id": "demo-night-rain",
+  "episode_title": "第1集 夜雨追凶",
+  "source_file": "/Users/apple/.openclaw/workspace/output/novel-to-ai-manju/materials/sample-chapter-001.md",
+  "scene_count": 2,
+  "chunk_size": 3,
+  "output_markdown": "/Users/apple/.openclaw/workspace/output/novel-to-ai-manju/projects/demo-night-rain/05_storyboard/20260309-065447-adapted-script.md",
+  "output_json": "/Users/apple/.openclaw/workspace/output/novel-to-ai-manju/projects/demo-night-rain/05_storyboard/20260309-065447-adapted-script.json",
+  "generated_at": "2026-03-09T06:54:47",
+  "stage": "05_storyboard",
+  "scenes": [
+    {
+      "scene_no": 1,
+      "headline": "场景1：雨下了一整夜，城南旧巷被雾气和路灯切成斑驳的光带。林砚踩着积水，...",
+      "goal": "推动冲突并释放一个新信息点",
+      "narration": [
+        "雨下了一整夜，城南旧巷被雾气和路灯切成斑驳的光带。林砚踩着积水，拎着旧相机，朝失联三天的线人住处赶去。"
+      ],
+      "dialogue": [
+        "门虚掩着，屋里只亮着一盏台灯。桌上摊着半张被火烤焦的地图，角落写着一个他熟悉又害怕的名字：\"渡鸦\"。",
+        "\"你终于来了。\" 角落里传来沙哑的声音，线人阿盛捂着腹部，脸色发白，\"他们提前动手了。\""
+      ],
+      "camera": "中近景对话，双人来回切",
+      "sfx": "环境底噪 + 关键动作拟音",
+      "duration_sec": 18
+    },
+    {
+      "scene_no": 2,
+      "headline": "场景2：林砚蹲下检查伤口，低声问：\"名单呢？你说今晚能拿到。\"",
+      "goal": "推动冲突并释放一个新信息点",
+      "narration": [
+        "楼道忽然传来急促脚步，灯光一闪一灭。林砚关掉台灯，把阿盛拖到柜子后面，自己贴着墙举起相机，准备按下快门。"
+      ],
+      "dialogue": [
+        "林砚蹲下检查伤口，低声问：\"名单呢？你说今晚能拿到。\"",
+        "阿盛把一枚存储卡塞进他手心，呼吸急促：\"码头，凌晨两点，第三仓库。别相信穿白衬衫的人。\""
+      ],
+      "camera": "中近景对话，双人来回切",
+      "sfx": "环境底噪 + 关键动作拟音",
+      "duration_sec": 18
+    }
+  ]
+}
